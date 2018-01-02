@@ -18319,6 +18319,7 @@ Source: www.kingbright.com</description>
 <part name="LED1" library="led" deviceset="LED" device="CHIP-LED0805"/>
 <part name="R9" library="rcl" deviceset="R-EU_" device="R1206" value="1k"/>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
+<part name="JP4" library="pinhead" deviceset="PINHD-1X2" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -18363,6 +18364,7 @@ Source: www.kingbright.com</description>
 <instance part="LED1" gate="G$1" x="96.52" y="93.98"/>
 <instance part="R9" gate="G$1" x="96.52" y="104.14" rot="R90"/>
 <instance part="GND12" gate="1" x="96.52" y="86.36"/>
+<instance part="JP4" gate="G$1" x="96.52" y="66.04"/>
 </instances>
 <busses>
 </busses>
@@ -18395,6 +18397,10 @@ Source: www.kingbright.com</description>
 <pinref part="R1" gate="G$1" pin="1"/>
 <pinref part="GND2" gate="1" pin="GND"/>
 <wire x1="83.82" y1="60.96" x2="83.82" y2="63.5" width="0.1524" layer="91"/>
+<pinref part="JP4" gate="G$1" pin="2"/>
+<wire x1="93.98" y1="66.04" x2="88.9" y2="66.04" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="66.04" x2="88.9" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="63.5" x2="83.82" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="R4" gate="1" pin="A"/>
@@ -18456,6 +18462,10 @@ Source: www.kingbright.com</description>
 <wire x1="76.2" y1="73.66" x2="76.2" y2="58.42" width="0.1524" layer="91"/>
 <pinref part="R3" gate="G$1" pin="2"/>
 <wire x1="76.2" y1="58.42" x2="66.04" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="73.66" x2="88.9" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="73.66" x2="88.9" y2="68.58" width="0.1524" layer="91"/>
+<pinref part="JP4" gate="G$1" pin="1"/>
+<wire x1="88.9" y1="68.58" x2="93.98" y2="68.58" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$2" class="0">
