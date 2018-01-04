@@ -95,6 +95,8 @@ void setupInterrupt()
 #define MODE_PRINT 1
 #define MODE_RETURN 2
 volatile byte mode=0;
+// divider, smaller is faster
+volatile byte maxSpeed=80;
 volatile unsigned int maxPosition=1000;
 
 #define DATA_BUFFER_SIZE 5000
@@ -164,8 +166,8 @@ ISR(TIMER1_COMPA_vect)
     distance=maxPosition-position;
 
   long tmp=200-(distance*5);
-  if(tmp<50)
-    tmp=50;
+  if(tmp<maxSpeed)
+    tmp=maxSpeed;
 
   if(tmp>200)
     tmp=200;
@@ -231,9 +233,35 @@ void loop() {
     }
     else if(ch=='X')
     {
-        Serial.write("0190069D\r\n");        
-    }    
+      sendHex(X_DPI,4);
+      sendHex(Y_DPI,4);      
+      Serial.write("\r\nOK\r\n");        
+    }
+    else if(ch=='S')
+    {
+      unsigned int val;
+      if(!ReadValue(&val,4))
+        Serial.write("Error\r\n");
+      else
+      {
+        maxSpeed=val;
+        Serial.write("OK\r\n");  
+      }
+    }
+    else if(ch=='R')
+    {
+        sendHex(maxSpeed,4);
+        Serial.write("\r\nOK\r\n");        
+    }
   }
+}
+
+char hexCodes[] ="0123456789ABCDEF";
+
+void sendHex(unsigned int val,int len)
+{
+  for(int i=len-1;i>=0;i--)  
+    Serial.write(hexCodes[((val >> (i * 4)) & 0x0f)]); 
 }
 
 bool MoveAxis()
