@@ -294,7 +294,7 @@ bool MoveAxis()
       if(axis=='Y')  
         WRITE(Y_STEP_PIN,i & 1);  
 
-      delay(5);           
+      delay(1);           
     }
     return(true);
 }
