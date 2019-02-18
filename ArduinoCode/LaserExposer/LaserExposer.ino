@@ -26,6 +26,8 @@
 #define Y_ENABLE_PIN       56
 #define Y_CS_PIN           49
 
+#define X_ENDSTOP          3
+#define Y_ENDSTOP          14
 #define LASER 11
 
 #define ENABLE_STEPPER_DRIVER_INTERRUPT()  SBI(TIMSK1, OCIE1A)
@@ -53,6 +55,9 @@ void setup() {
   WRITE(Y_ENABLE_PIN,LOW);
 //  WRITE(X_CS_PIN,0);
 
+  pinMode(X_ENDSTOP, INPUT_PULLUP); 
+  pinMode(Y_ENDSTOP, INPUT_PULLUP); 
+  
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LASER, OUTPUT);
   setupInterrupt();
@@ -153,7 +158,7 @@ ISR(TIMER1_COMPA_vect)
   int bi = GET_BUFFER_POSITION(position) % 8;
   byte d=dataBuffer[GET_BUFFER_POSITION(position) / 8];
 
-//  if(mode==MODE_PRINT)
+  if(mode==MODE_PRINT)
     WRITE(LASER,(d & ( 1 << bi)) ? HIGH : LOW );
 
   WRITE(X_STEP_PIN,GET_STEPPER_POSITION(position) & 1);  
@@ -186,13 +191,24 @@ void loop() {
   delay(1);
   WRITE(X_STEP_PIN,LOW);
   digitalWrite(LED_BUILTIN, LOW);
+
+
+  if(digitalRead(X_ENDSTOP))  
+    Serial.write("u");
+  else
+    Serial.write("d");
+
+  if(digitalRead(Y_ENDSTOP))  
+    Serial.write("a");
+  else
+    Serial.write("b");
 */
-
-
+  
   if( Serial.available())
   {
     char ch = Serial.read();
 
+    // Print - Receives length of array and then array of data. Prints row.
     if(ch=='P')
     {
       if(readBuffer())
@@ -204,7 +220,8 @@ void loop() {
       }
       else
         Serial.write("Error\r\n");        
-    }    
+    }
+    //Move - Moves X or Y axis count of steps. Example MX+0010    
     else if(ch=='M')
     {
       if(MoveAxis())
@@ -220,6 +237,7 @@ void loop() {
         ;
       Serial.write("OK\r\n");
     }
+    // Laser on/off. Example L1
     else if(ch=='L')
     {
       unsigned int val;
@@ -231,12 +249,14 @@ void loop() {
         Serial.write("OK\r\n");  
       }
     }
+    // Get capabilities 
     else if(ch=='X')
     {
       sendHex(X_DPI,4);
       sendHex(Y_DPI,4);      
       Serial.write("\r\nOK\r\n");        
     }
+    // Set print speed - Example S0010 lower number is faster
     else if(ch=='S')
     {
       unsigned int val;
@@ -248,10 +268,16 @@ void loop() {
         Serial.write("OK\r\n");  
       }
     }
+    // Read speed setting
     else if(ch=='R')
     {
         sendHex(maxSpeed,4);
         Serial.write("\r\nOK\r\n");        
+    }
+    else if(ch=='Z')
+    {
+      MoveToZero();
+      Serial.write("\r\nOK\r\n");
     }
   }
 }
@@ -262,6 +288,38 @@ void sendHex(unsigned int val,int len)
 {
   for(int i=len-1;i>=0;i--)  
     Serial.write(hexCodes[((val >> (i * 4)) & 0x0f)]); 
+}
+
+void MoveToZero()
+{
+    while(!Serial.available());  
+    char axis = Serial.read();
+    if(axis!='X' && axis!='Y')
+      return(false);
+
+    if(axis=='X')
+    {
+      WRITE(X_DIR_PIN,LOW);
+      for(int i=0;i<10000;i++)
+      {
+        WRITE(X_STEP_PIN,i & 1);
+        delay(2);
+        if(digitalRead(X_ENDSTOP))
+          break;
+      }          
+    }
+
+    if(axis=='Y')
+    {
+      WRITE(Y_DIR_PIN,LOW);
+      for(int i=0;i<100000;i++)
+      {
+        WRITE(Y_STEP_PIN,i & 1);
+        delay(1);
+        if(digitalRead(Y_ENDSTOP))
+          break;
+      }          
+    }
 }
 
 bool MoveAxis()
@@ -354,4 +412,3 @@ int HexToVal(char ch)
 
   return(-1);    
 }
-
